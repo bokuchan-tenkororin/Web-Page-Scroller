@@ -1,0 +1,101 @@
+{
+  "extDescription": {
+    "message": "Space scrolls by custom amount, Shift+Space up, Ctrl+Shift+Z auto-scroll. Settings auto-saved to bookmark."
+  },
+  "optionsTitle": {
+    "message": "Web Page Scroller Settings"
+  },
+  "optionsSubtitle": {
+    "message": "Space down, Shift+Space up. Auto-scroll Ctrl+Shift+Z."
+  },
+  "sectionGlobal": {
+    "message": "1. Global Scroll Amount"
+  },
+  "labelGlobalPercent": {
+    "message": "Viewport %"
+  },
+  "hintGlobal": {
+    "message": "100% = one screen."
+  },
+  "sectionSite": {
+    "message": "2. Per-Site Scroll"
+  },
+  "hintSite": {
+    "message": "Wildcard * supported."
+  },
+  "addRule": {
+    "message": "+ Add Rule"
+  },
+  "rulePlaceholder": {
+    "message": "e.g. youtube.com"
+  },
+  "delete": {
+    "message": "Delete"
+  },
+  "enabled": {
+    "message": "Enabled"
+  },
+  "sectionAuto": {
+    "message": "3. Auto Scroll"
+  },
+  "speedLabel": {
+    "message": "Speed (px/frame)"
+  },
+  "hintAuto": {
+    "message": "Default Ctrl+Shift+Z. Change in chrome://extensions/shortcuts. Press again or ESC to stop."
+  },
+  "commandDesc": {
+    "message": "Toggle auto scroll"
+  },
+  "autoScrolling": {
+    "message": "● Auto scrolling (Ctrl+Shift+Z to stop)"
+  },
+  "sectionBookmark": {
+    "message": "4. Pseudo-Bookmark Save"
+  },
+  "hintBookmark": {
+    "message": "Select folder. Auto-saves on close, auto-loads on startup. Folder info is saved inside bookmark."
+  },
+  "folderLabel": {
+    "message": "Save folder"
+  },
+  "selectFolder": {
+    "message": "-- Select folder --"
+  },
+  "statusSaved": {
+    "message": "Saved ✔ $1",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "customOption": {
+    "message": "Custom..."
+  },
+  "autoSaveHint": {
+    "message": "Auto-saved on change. Bookmark folder saves on close and loads on startup."
+  },
+  "loadingFolders": {
+    "message": "Loading..."
+  },
+  "getFailed": {
+    "message": "Failed: $1",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "savedBookmark": {
+    "message": "Bookmark saved ✔"
+  },
+  "saveFailed": {
+    "message": "Save failed: $1",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  }
+}

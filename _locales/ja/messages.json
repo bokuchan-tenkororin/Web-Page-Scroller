@@ -1,0 +1,101 @@
+{
+  "extDescription": {
+    "message": "Spaceで下へ、Shift+Spaceで上へ、Ctrl+Shift+Zで自動スクロール。設定はブックマークに自動保存。"
+  },
+  "optionsTitle": {
+    "message": "Web Page Scroller 設定"
+  },
+  "optionsSubtitle": {
+    "message": "Spaceで下へ、Shift+Spaceで上へ。Ctrl+Shift+Zで自動スクロール。"
+  },
+  "sectionGlobal": {
+    "message": "1. グローバルスクロール量"
+  },
+  "labelGlobalPercent": {
+    "message": "画面に対する割合"
+  },
+  "hintGlobal": {
+    "message": "100% = 1画面分。"
+  },
+  "sectionSite": {
+    "message": "2. サイト別スクロール量"
+  },
+  "hintSite": {
+    "message": "ワイルドカード * 対応"
+  },
+  "addRule": {
+    "message": "＋ ルールを追加"
+  },
+  "rulePlaceholder": {
+    "message": "例: youtube.com"
+  },
+  "delete": {
+    "message": "削除"
+  },
+  "enabled": {
+    "message": "有効"
+  },
+  "sectionAuto": {
+    "message": "3. 自動スクロール"
+  },
+  "speedLabel": {
+    "message": "速度 (px/フレーム)"
+  },
+  "hintAuto": {
+    "message": "デフォルト Ctrl+Shift+Z。chrome://extensions/shortcuts で変更可。もう一度押すかESCで停止。"
+  },
+  "commandDesc": {
+    "message": "自動スクロール開始/停止"
+  },
+  "autoScrolling": {
+    "message": "● 自動スクロール中 (Ctrl+Shift+Z で停止)"
+  },
+  "sectionBookmark": {
+    "message": "4. 疑似ブックマーク保存"
+  },
+  "hintBookmark": {
+    "message": "保存フォルダを選択してください。閉じると自動保存、起動時に自動読込します。保存フォルダ情報もブックマーク内に保存されます。"
+  },
+  "folderLabel": {
+    "message": "保存フォルダ"
+  },
+  "selectFolder": {
+    "message": "-- フォルダを選択 --"
+  },
+  "statusSaved": {
+    "message": "保存しました ✔ $1",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "customOption": {
+    "message": "カスタム..."
+  },
+  "autoSaveHint": {
+    "message": "変更時に自動保存。フォルダ選択時は閉じた時にブックマークへ自動保存、起動時に自動読込。"
+  },
+  "loadingFolders": {
+    "message": "読み込み中..."
+  },
+  "getFailed": {
+    "message": "取得失敗: $1",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "savedBookmark": {
+    "message": "ブックマークに保存しました ✔"
+  },
+  "saveFailed": {
+    "message": "保存失敗: $1",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  }
+}

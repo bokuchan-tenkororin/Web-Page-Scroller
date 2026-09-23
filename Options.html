@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="optionsTitle">Web Page Scroller</title>
+<link rel="stylesheet" href="options.css">
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1 data-i18n="optionsTitle">Web Page Scroller</h1>
+    <p class="subtitle" data-i18n="optionsSubtitle"></p>
+  </header>
+
+  <section class="card">
+    <h2 data-i18n="sectionGlobal"></h2>
+    <div class="row">
+      <label for="globalSelect" data-i18n="labelGlobalPercent"></label>
+      <select id="globalSelect"></select>
+      <div id="globalCustomWrap" class="custom-wrap hidden">
+        <input type="number" id="globalCustomInput" min="0" max="500" step="1" placeholder="85">
+        <span>%</span>
+      </div>
+    </div>
+    <p class="hint" data-i18n="hintGlobal"></p>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h2 data-i18n="sectionSite"></h2>
+      <button id="addRuleBtn" class="btn secondary small" data-i18n="addRule"></button>
+    </div>
+    <p class="hint" data-i18n="hintSite"></p>
+    <div id="siteRules"></div>
+  </section>
+
+  
+
+  <section class="card">
+    <h2 data-i18n="sectionAuto">3. 自動スクロール</h2>
+    <div class="row">
+      <label for="autoSpeed" data-i18n="speedLabel"></label>
+      <input type="range" id="autoSpeed" min="0.1" max="2" step="0.1">
+      <span id="autoSpeedVal">3</span>
+    </div>
+    <p class="hint" data-i18n="hintAuto"></p>
+  </section>
+
+  <section class="card bookmark-card">
+    <h2 data-i18n="sectionBookmark">4. 疑似ブックマーク保存</h2>
+    <p class="hint" data-i18n="hintBookmark"></p>
+    <div class="row">
+      <label for="bookmarkFolderSelect" data-i18n="folderLabel"></label>
+      <select id="bookmarkFolderSelect"><option data-i18n="loadingFolders"></option></select>
+    </div>
+    <div id="bookmarkStatus" class="status"></div>
+  </section>
+
+  <footer class="footer">
+    <div id="saveStatus" class="status"></div>
+    <p class="hint center" data-i18n="autoSaveHint"></p>
+  </footer>
+</div>
+<script src="options.js"></script>
+</body>
+</html>
