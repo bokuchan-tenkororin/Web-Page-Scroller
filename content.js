@@ -16,6 +16,12 @@
   let dialogOverlay = null;
 
   function clone(o){ return JSON.parse(JSON.stringify(o)); }
+  function msg(key, args=[]){
+    try{ return (args.length?chrome.i18n.getMessage(key,args):chrome.i18n.getMessage(key)) || ""; }catch{ return ""; }
+  }
+  function escapeHtml(value){
+    return String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
 
   async function loadSettings(){
     try{
@@ -170,21 +176,28 @@
   // ========== 登録ダイアログ ==========
   function isStandardPercent(v){ return [100,90,80,70,60,50,40,30,20,10,0].includes(Number(v)); }
 
-  function injectDialogStyles(){
-    if(document.getElementById("__wps_dialog_styles__")) return;
+  function injectDialogStyles(root){
     const style=document.createElement("style");
     style.id="__wps_dialog_styles__";
     style.textContent=`
+      :host{ all:initial !important; position:fixed !important; inset:0 !important; display:block !important; z-index:2147483647 !important; }
+      *, *::before, *::after{ box-sizing:border-box; }
       #__web_page_scroller_dialog_overlay__{
         position:fixed; inset:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(2px);
         z-index:2147483646; display:flex; align-items:center; justify-content:center;
-        font-family:"Segoe UI", Meiryo, sans-serif;
+        padding:12px; font-family:"Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, system-ui, sans-serif !important;
+        color:#222 !important; font-size:14px !important; line-height:1.5 !important;
       }
       #__web_page_scroller_dialog_overlay__ .wps-dialog{
-        background:#fff; border-radius:16px; padding:22px 22px 18px; width:420px; max-width:90vw;
-        box-shadow:0 20px 60px rgba(0,0,0,0.32); color:#222; line-height:1.5;
+        background:#fff !important; border-radius:16px; padding:22px 22px 18px;
+        width:min(420px, 100%); max-height:calc(100vh - 24px); overflow:auto;
+        box-sizing:border-box !important; box-shadow:0 20px 60px rgba(0,0,0,0.32);
+        color:#222 !important; font-family:"Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, system-ui, sans-serif !important;
+        font-size:14px !important; line-height:1.5 !important; text-align:left !important;
         animation:wps-pop 0.18s ease-out;
       }
+      #__web_page_scroller_dialog_overlay__ .wps-dialog,
+      #__web_page_scroller_dialog_overlay__ .wps-dialog *{ box-sizing:border-box !important; }
       @keyframes wps-pop{ from{ transform:scale(0.96) translateY(6px); opacity:0; } to{ transform:scale(1) translateY(0); opacity:1; } }
       #__web_page_scroller_dialog_overlay__ .wps-dialog h2{
         margin:0 0 14px; font-size:16px; border-left:4px solid #4f7cff; padding-left:8px;
@@ -194,20 +207,43 @@
       #__web_page_scroller_dialog_overlay__ .wps-row input[type="text"],
       #__web_page_scroller_dialog_overlay__ .wps-row select,
       #__web_page_scroller_dialog_overlay__ .wps-row input[type="number"]{
-        flex:1; padding:8px 10px; border:1px solid #d0d7e2; border-radius:8px; font-size:14px; min-width:160px;
+        flex:1 1 160px; padding:8px 10px; border:1px solid #d0d7e2; border-radius:8px;
+        font-family:inherit !important; font-size:14px !important; line-height:1.4 !important;
+        color:#222 !important; min-width:min(160px, 100%); max-width:100%;
       }
-      #__web_page_scroller_dialog_overlay__ .wps-hint{ color:#6b7280; font-size:11px; margin:4px 0 2px 110px; }
+      #__web_page_scroller_dialog_overlay__ .wps-hint{ color:#6b7280 !important; font-size:11px !important; margin:4px 0 2px 120px; font-family:inherit !important; }
       #__web_page_scroller_dialog_overlay__ .wps-status{ min-height:18px; font-size:12px; margin:8px 0; }
       #__web_page_scroller_dialog_overlay__ .wps-status.ok{ color:#0a7a42; }
       #__web_page_scroller_dialog_overlay__ .wps-status.err{ color:#c53030; }
       #__web_page_scroller_dialog_overlay__ .wps-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:16px; flex-wrap:wrap; }
-      #__web_page_scroller_dialog_overlay__ .wps-btn{ padding:8px 14px; border-radius:8px; border:1px solid #d0d7e2; background:#fff; cursor:pointer; font-size:13px; }
-      #__web_page_scroller_dialog_overlay__ .wps-btn.primary{ background:#4f7cff; color:#fff; border-color:#4f7cff; }
-      #__web_page_scroller_dialog_overlay__ .wps-btn.danger{ color:#e53e3e; border-color:#fbd5d5; background:#fff5f5; }
+      #__web_page_scroller_dialog_overlay__ .wps-btn{
+        appearance:none !important; -webkit-appearance:none !important; flex:0 1 auto !important;
+        width:auto !important; min-width:0 !important; max-width:100% !important;
+        padding:8px 14px !important; border-radius:8px !important; border:1px solid #d0d7e2 !important;
+        background:#fff !important; color:#222 !important; cursor:pointer; font-family:inherit !important;
+        font-size:13px !important; font-weight:500 !important; line-height:1.4 !important;
+        text-align:center !important; text-transform:none !important; white-space:normal !important; overflow-wrap:anywhere !important;
+      }
+      #__web_page_scroller_dialog_overlay__ .wps-btn.primary{ background:#4f7cff !important; color:#fff !important; border-color:#4f7cff !important; }
+      #__web_page_scroller_dialog_overlay__ .wps-btn.danger{ color:#e53e3e !important; border-color:#fbd5d5 !important; background:#fff5f5 !important; }
       #__web_page_scroller_dialog_overlay__ .wps-btn:hover{ filter:brightness(0.97); }
       #__web_page_scroller_dialog_overlay__ .wps-current{ background:#f8fafc; border:1px solid #e6eaf0; border-radius:8px; padding:8px 10px; font-size:12px; margin:10px 0; }
+      #__web_page_scroller_dialog_overlay__ .wps-enabled-row{ align-items:flex-start; }
+      #__web_page_scroller_dialog_overlay__ .wps-enabled-row > label{ flex:0 0 110px; }
+      #__web_page_scroller_dialog_overlay__ .wps-enabled-controls{ display:flex; align-items:center; gap:8px; flex:1 1 180px; min-width:0; }
+      #__web_page_scroller_dialog_overlay__ #wps-enabled{ appearance:auto !important; -webkit-appearance:checkbox !important; flex:0 0 auto; width:16px !important; height:16px !important; min-width:16px !important; margin:2px 0 0 !important; }
+      #__web_page_scroller_dialog_overlay__ .wps-enabled-controls span{ min-width:0; overflow-wrap:anywhere; font-size:12px !important; color:#222 !important; }
+      @media (max-width:480px){
+        #__web_page_scroller_dialog_overlay__ .wps-dialog{ padding:18px 16px 16px; }
+        #__web_page_scroller_dialog_overlay__ .wps-row label{ flex-basis:100%; }
+        #__web_page_scroller_dialog_overlay__ .wps-enabled-row > label{ flex-basis:100%; }
+        #__web_page_scroller_dialog_overlay__ .wps-hint{ margin-left:0; }
+        #__web_page_scroller_dialog_overlay__ .wps-enabled-controls{ flex-basis:100%; }
+        #__web_page_scroller_dialog_overlay__ .wps-actions{ justify-content:flex-start; }
+        #__web_page_scroller_dialog_overlay__ .wps-btn{ flex:1 1 40% !important; }
+      }
     `;
-    (document.head||document.documentElement).appendChild(style);
+    root.appendChild(style);
   }
 
   function closeRegisterDialog(){
@@ -215,12 +251,9 @@
       try{ dialogOverlay.parentNode.removeChild(dialogOverlay); }catch{}
     }
     dialogOverlay=null;
-    const s=document.getElementById("__wps_dialog_styles__");
-    // スタイルは残してもOKだが、閉じるたびに消すならコメントアウト
   }
 
   function showRegisterDialog(){
-    injectDialogStyles();
     if(dialogOverlay){
       closeRegisterDialog();
       return;
@@ -245,90 +278,100 @@
     const initialEnabled = best ? (best.enabled!==false) : true;
     const globalPercent = settings.globalScrollPercent;
 
+    const hostElement=document.createElement("div");
+    hostElement.id="__web_page_scroller_dialog_host__";
+    // Closed shadow root prevents page scripts from traversing into and rewriting dialog text.
+    const dialogRoot=hostElement.attachShadow({mode:"closed"});
+    injectDialogStyles(dialogRoot);
     const overlay=document.createElement("div");
     overlay.id="__web_page_scroller_dialog_overlay__";
+    try{ overlay.lang=chrome.i18n.getUILanguage().toLowerCase().startsWith("en")?"en":"ja"; }catch{ overlay.lang="ja"; }
     overlay.addEventListener("click", (e)=>{ if(e.target===overlay) closeRegisterDialog(); });
 
     const isStd = isStandardPercent(initialPercent);
 
     overlay.innerHTML=`
-      <div class="wps-dialog" role="dialog" aria-modal="true">
-        <h2>Web Page Scroller - ページ登録</h2>
+      <div class="wps-dialog" role="dialog" aria-modal="true" aria-labelledby="wps-title">
+        <h2 id="wps-title">${msg("dialogTitle")}</h2>
         <div class="wps-current">
-          現在: <b>${host}</b><br>
-          適用中: <b>${getScrollPercent()}%</b> (グローバル ${globalPercent}%)<br>
-          URL: <span style="word-break:break-all; color:#6b7280;">${url.slice(0,120)}</span>
+          ${msg("dialogCurrentSite")}: <b>${escapeHtml(host)}</b><br>
+          ${msg("dialogApplied")}: <b>${getScrollPercent()}%</b> (${msg("dialogGlobal")} ${globalPercent}%)<br>
+          ${msg("dialogUrl")}: <span style="word-break:break-all; color:#6b7280;">${escapeHtml(url.slice(0,120))}</span>
         </div>
         <div class="wps-row">
-          <label>パターン</label>
-          <input type="text" id="wps-pattern" value="${initialPattern.replace(/"/g,'&quot;')}" placeholder="例: youtube.com または *example.com*">
+          <label for="wps-pattern">${msg("dialogPattern")}</label>
+          <input type="text" id="wps-pattern" value="${escapeHtml(initialPattern)}" placeholder="${escapeHtml(msg("dialogPatternPlaceholder"))}">
         </div>
-        <div class="wps-hint">ワイルドカード * 対応。部分一致で判定、最長一致が優先されます。</div>
+        <div class="wps-hint" id="wps-hint"></div>
         <div class="wps-row">
-          <label>スクロール量</label>
+          <label for="wps-percent-select">${msg("dialogScrollAmount")}</label>
           <select id="wps-percent-select"></select>
           <div id="wps-custom-wrap" style="display:${isStd?'none':'flex'}; align-items:center; gap:6px;">
             <input type="number" id="wps-custom-input" min="0" max="500" step="1" value="${Number(initialPercent)}" style="width:90px; min-width:90px;">
             <span>%</span>
           </div>
         </div>
-        <div class="wps-row">
-          <label>有効</label>
-          <input type="checkbox" id="wps-enabled" ${initialEnabled?'checked':''}>
-          <span style="font-size:12px;">このルールを有効にする</span>
+        <div class="wps-row wps-enabled-row">
+          <label for="wps-enabled">${msg("dialogEnabled")}</label>
+          <div class="wps-enabled-controls">
+            <input type="checkbox" id="wps-enabled" ${initialEnabled?'checked':''}>
+            <span>${msg("dialogEnabledHint")}</span>
+          </div>
         </div>
         <div id="wps-status" class="wps-status"></div>
         <div class="wps-actions">
-          <button class="wps-btn" id="wps-cancel">キャンセル</button>
-          ${best ? '<button class="wps-btn danger" id="wps-delete">削除</button>' : ''}
-          <button class="wps-btn" id="wps-options">詳細設定</button>
-          <button class="wps-btn primary" id="wps-save">保存</button>
+          <button type="button" class="wps-btn" id="wps-cancel">${msg("dialogCancel")}</button>
+          ${best ? `<button type="button" class="wps-btn danger" id="wps-delete">${msg("dialogDelete")}</button>` : ''}
+          <button type="button" class="wps-btn" id="wps-options">${msg("dialogOptions")}</button>
+          <button type="button" class="wps-btn primary" id="wps-save">${msg("dialogSave")}</button>
         </div>
       </div>
     `;
 
-    (document.body||document.documentElement).appendChild(overlay);
-    dialogOverlay=overlay;
+    dialogRoot.appendChild(overlay);
+    (document.body||document.documentElement).appendChild(hostElement);
+    dialogOverlay=hostElement;
+    dialogRoot.querySelector("#wps-hint").textContent=msg("dialogWildcardHint");
 
-    const sel=overlay.querySelector("#wps-percent-select");
+    const sel=dialogRoot.querySelector("#wps-percent-select");
     for(let i=100;i>=0;i-=10){
       const o=document.createElement("option");
       o.value=String(i); o.textContent=i+"%";
       sel.appendChild(o);
     }
     const co=document.createElement("option");
-    co.value="custom"; co.textContent="カスタム...";
+    co.value="custom"; co.textContent=msg("customOption")||"Custom...";
     sel.appendChild(co);
     if(isStd) sel.value=String(Number(initialPercent));
     else sel.value="custom";
 
-    const customWrap=overlay.querySelector("#wps-custom-wrap");
+    const customWrap=dialogRoot.querySelector("#wps-custom-wrap");
     sel.addEventListener("change", ()=>{
       if(sel.value==="custom") customWrap.style.display="flex";
       else customWrap.style.display="none";
     });
 
-    const statusEl=overlay.querySelector("#wps-status");
+    const statusEl=dialogRoot.querySelector("#wps-status");
     function setStatus(msg, ok){
       statusEl.textContent=msg;
       statusEl.className="wps-status "+(ok?"ok":"err");
     }
 
-    overlay.querySelector("#wps-cancel").addEventListener("click", closeRegisterDialog);
-    overlay.querySelector("#wps-options").addEventListener("click", ()=>{
+    dialogRoot.querySelector("#wps-cancel").addEventListener("click", closeRegisterDialog);
+    dialogRoot.querySelector("#wps-options").addEventListener("click", ()=>{
       try{ chrome.runtime.sendMessage({type:"OPEN_OPTIONS"}); }catch{}
       // フォールバック: 直接URLを開く
       try{
-        const url=chrome.runtime.getURL("options.html");
+        const url=chrome.runtime.getURL("Options.html");
         window.open(url, "_blank");
       }catch{}
     });
 
-    const deleteBtn=overlay.querySelector("#wps-delete");
+    const deleteBtn=dialogRoot.querySelector("#wps-delete");
     if(deleteBtn){
       deleteBtn.addEventListener("click", async ()=>{
-        const pattern=overlay.querySelector("#wps-pattern").value.trim();
-        if(!pattern){ setStatus("パターンを入力してください", false); return; }
+        const pattern=dialogRoot.querySelector("#wps-pattern").value.trim();
+        if(!pattern){ setStatus(msg("dialogPatternRequired"), false); return; }
         try{
           const res=await chrome.storage.sync.get(["settings"]);
           let s=res.settings || clone(DEFAULT_SETTINGS);
@@ -337,25 +380,25 @@
           if(s.bookmark?.folderId){
             try{ chrome.runtime.sendMessage({type:"SAVE_TO_BOOKMARK", settings:s, folderId:s.bookmark.folderId}); }catch{}
           }
-          setStatus("削除しました ✔", true);
+          setStatus(msg("dialogDeleted"), true);
           setTimeout(closeRegisterDialog, 800);
-        }catch(e){ setStatus("削除失敗: "+e.message, false); }
+        }catch(e){ setStatus(msg("dialogDeleteFailed", [e.message]), false); }
       });
     }
 
-    overlay.querySelector("#wps-save").addEventListener("click", async ()=>{
-      const patternInput=overlay.querySelector("#wps-pattern");
+    dialogRoot.querySelector("#wps-save").addEventListener("click", async ()=>{
+      const patternInput=dialogRoot.querySelector("#wps-pattern");
       const pattern=patternInput.value.trim();
-      if(!pattern){ setStatus("パターンを入力してください", false); patternInput.focus(); return; }
+      if(!pattern){ setStatus(msg("dialogPatternRequired"), false); patternInput.focus(); return; }
       let percent;
       if(sel.value==="custom"){
-        percent=Number(overlay.querySelector("#wps-custom-input").value);
-        if(isNaN(percent)){ setStatus("数値を入力してください", false); return; }
+        percent=Number(dialogRoot.querySelector("#wps-custom-input").value);
+        if(isNaN(percent)){ setStatus(msg("dialogNumberRequired"), false); return; }
       } else {
         percent=Number(sel.value);
       }
-      if(percent<0 || percent>500){ setStatus("0〜500%で入力してください", false); return; }
-      const enabled=overlay.querySelector("#wps-enabled").checked;
+      if(percent<0 || percent>500){ setStatus(msg("dialogPercentRange"), false); return; }
+      const enabled=dialogRoot.querySelector("#wps-enabled").checked;
 
       try{
         const res=await chrome.storage.sync.get(["settings"]);
@@ -371,15 +414,15 @@
         if(s.bookmark?.folderId){
           try{ chrome.runtime.sendMessage({type:"SAVE_TO_BOOKMARK", settings:s, folderId:s.bookmark.folderId}); }catch{}
         }
-        setStatus(`保存しました ✔ ${pattern} → ${percent}%`, true);
+        setStatus(msg("dialogSaved", [pattern, String(percent)]), true);
         setTimeout(closeRegisterDialog, 900);
       }catch(e){
-        setStatus("保存失敗: "+e.message, false);
+        setStatus(msg("dialogSaveFailed", [e.message]), false);
       }
     });
 
     // パターン入力にフォーカス
-    setTimeout(()=>{ const inp=overlay.querySelector("#wps-pattern"); if(inp) inp.focus(); }, 50);
+    setTimeout(()=>{ const inp=dialogRoot.querySelector("#wps-pattern"); if(inp) inp.focus(); }, 50);
   }
 
   window.__WEB_PAGE_SCROLLER_TOGGLE__ = toggleAuto;

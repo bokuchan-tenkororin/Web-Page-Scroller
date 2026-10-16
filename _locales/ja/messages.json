@@ -97,5 +97,36 @@
         "content": "$1"
       }
     }
+  },
+  "dialogTitle": { "message": "Web Page Scroller - ページ登録" },
+  "dialogCurrentSite": { "message": "現在のサイト" },
+  "dialogApplied": { "message": "適用中" },
+  "dialogGlobal": { "message": "グローバル" },
+  "dialogUrl": { "message": "URL" },
+  "dialogPattern": { "message": "パターン" },
+  "dialogPatternPlaceholder": { "message": "例: youtube.com または *example.com*" },
+  "dialogWildcardHint": { "message": "ワイルドカード * 対応。部分一致で判定、最長一致が優先されます。" },
+  "dialogScrollAmount": { "message": "スクロール量" },
+  "dialogEnabled": { "message": "有効" },
+  "dialogEnabledHint": { "message": "このルールを有効にする" },
+  "dialogCancel": { "message": "キャンセル" },
+  "dialogDelete": { "message": "削除" },
+  "dialogOptions": { "message": "詳細設定" },
+  "dialogSave": { "message": "保存" },
+  "dialogPatternRequired": { "message": "パターンを入力してください" },
+  "dialogNumberRequired": { "message": "数値を入力してください" },
+  "dialogPercentRange": { "message": "0〜500%で入力してください" },
+  "dialogDeleted": { "message": "削除しました ✔" },
+  "dialogDeleteFailed": {
+    "message": "削除失敗: $1",
+    "placeholders": { "error": { "content": "$1" } }
+  },
+  "dialogSaved": {
+    "message": "保存しました ✔ $1 → $2%",
+    "placeholders": { "pattern": { "content": "$1" }, "percent": { "content": "$2" } }
+  },
+  "dialogSaveFailed": {
+    "message": "保存失敗: $1",
+    "placeholders": { "error": { "content": "$1" } }
   }
 }

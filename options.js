@@ -11,7 +11,13 @@ let lastSavedFolderId = null;
 
 function el(id){ return document.getElementById(id); }
 function i18n(k,...args){ try{ return args.length?chrome.i18n.getMessage(k,args):chrome.i18n.getMessage(k)||""; }catch{return"";} }
-function applyI18n(){ document.querySelectorAll("[data-i18n]").forEach(n=>{ const k=n.getAttribute("data-i18n"); const m=i18n(k); if(m && n.childElementCount===0) n.textContent=m; }); }
+function applyI18n(){
+  try{
+    const locale=chrome.i18n.getUILanguage().toLowerCase();
+    document.documentElement.lang=locale.startsWith("en")?"en":"ja";
+  }catch{ document.documentElement.lang="ja"; }
+  document.querySelectorAll("[data-i18n]").forEach(n=>{ const k=n.getAttribute("data-i18n"); const m=i18n(k); if(m && n.childElementCount===0) n.textContent=m; });
+}
 function buildPercentOptions(){
   const sel=el("globalSelect"); sel.innerHTML="";
   for(let i=100;i>=0;i-=10){ const o=document.createElement("option"); o.value=String(i); o.textContent=i+"%"; sel.appendChild(o); }

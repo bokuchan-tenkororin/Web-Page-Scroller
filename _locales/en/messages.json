@@ -97,5 +97,36 @@
         "content": "$1"
       }
     }
+  },
+  "dialogTitle": { "message": "Web Page Scroller - Add page rule" },
+  "dialogCurrentSite": { "message": "Current site" },
+  "dialogApplied": { "message": "Applied" },
+  "dialogGlobal": { "message": "Global" },
+  "dialogUrl": { "message": "URL" },
+  "dialogPattern": { "message": "Pattern" },
+  "dialogPatternPlaceholder": { "message": "e.g. youtube.com or *example.com*" },
+  "dialogWildcardHint": { "message": "Wildcard * supported. Matches by substring; the longest matching rule takes priority." },
+  "dialogScrollAmount": { "message": "Scroll amount" },
+  "dialogEnabled": { "message": "Enabled" },
+  "dialogEnabledHint": { "message": "Enable this rule" },
+  "dialogCancel": { "message": "Cancel" },
+  "dialogDelete": { "message": "Delete" },
+  "dialogOptions": { "message": "Settings" },
+  "dialogSave": { "message": "Save" },
+  "dialogPatternRequired": { "message": "Enter a pattern." },
+  "dialogNumberRequired": { "message": "Enter a number." },
+  "dialogPercentRange": { "message": "Enter a value from 0 to 500%." },
+  "dialogDeleted": { "message": "Deleted ✔" },
+  "dialogDeleteFailed": {
+    "message": "Delete failed: $1",
+    "placeholders": { "error": { "content": "$1" } }
+  },
+  "dialogSaved": {
+    "message": "Saved ✔ $1 → $2%",
+    "placeholders": { "pattern": { "content": "$1" }, "percent": { "content": "$2" } }
+  },
+  "dialogSaveFailed": {
+    "message": "Save failed: $1",
+    "placeholders": { "error": { "content": "$1" } }
   }
 }
