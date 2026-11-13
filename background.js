@@ -135,11 +135,15 @@ async function loadOnStartup(){
   }catch(e){ console.error(e); }
 }
 
-chrome.runtime.onStartup.addListener(()=>{ loadOnStartup(); });
+chrome.runtime.onStartup.addListener(async ()=>{
+  await loadOnStartup();
+  await refreshAllTabIcons();
+});
 chrome.runtime.onInstalled.addListener(async ()=>{
   const {settings} = await chrome.storage.sync.get(["settings"]);
   if(!settings) await chrome.storage.sync.set({settings: getDefaultSettings()});
-  loadOnStartup();
+  await loadOnStartup();
+  await refreshAllTabIcons();
 });
 
 // アイコンクリックで登録ダイアログを表示
@@ -206,9 +210,98 @@ chrome.commands.onCommand.addListener(async (command)=>{
   }catch(e){ console.error(e); }
 });
 
+async function setScrollPercentIcon(tabId, percent){
+  try{
+    const roundedPercent = Math.round(percent);
+    if(roundedPercent === 100){
+      await chrome.action.setBadgeText({tabId, text:""});
+      await chrome.action.setIcon({
+        tabId,
+        path:{
+          16:"icons/icon16.png",
+          48:"icons/icon48.png",
+          128:"icons/icon128.png"
+        }
+      });
+      return;
+    }
+
+    await chrome.action.setBadgeBackgroundColor({tabId, color:"#d93025"});
+    await chrome.action.setBadgeText({tabId, text:`${roundedPercent}%`});
+  }catch(error){
+    console.warn("[Web Page Scroller] Could not update scroll amount icon", error);
+  }
+}
+
+function getScrollPercentForUrl(url, settings){
+  let best = null;
+  let bestLen = -1;
+  for(const rule of settings.siteRules || []){
+    if(rule.enabled === false || !rule.pattern) continue;
+    const pattern = rule.pattern.trim();
+    let matches = false;
+    if(pattern.includes("*")){
+      try{
+        const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g,"\\$&").replace(/\*/g,".*");
+        matches = new RegExp(escaped,"i").test(url);
+      }catch{
+        matches = url.toLowerCase().includes(pattern.replace(/\*/g,"").toLowerCase());
+      }
+    }else{
+      matches = url.toLowerCase().includes(pattern.toLowerCase());
+    }
+    if(matches && pattern.length > bestLen){
+      best = rule;
+      bestLen = pattern.length;
+    }
+  }
+  return Number(best ? best.scrollPercent : settings.globalScrollPercent);
+}
+
+async function refreshTabIcon(tabId, url, settings){
+  if(!Number.isInteger(tabId) || !url || isRestrictedUrl(url)) return;
+  const percent = getScrollPercentForUrl(url, settings);
+  if(Number.isFinite(percent)){
+    await setScrollPercentIcon(tabId, Math.max(0, Math.min(500, percent)));
+  }
+}
+
+async function refreshAllTabIcons(){
+  try{
+    const {settings: stored} = await chrome.storage.sync.get(["settings"]);
+    const settings = {...getDefaultSettings(), ...(stored || {})};
+    const tabs = await chrome.tabs.query({});
+    await Promise.all(tabs.map(tab=>refreshTabIcon(tab.id, tab.url, settings)));
+  }catch(error){
+    console.warn("[Web Page Scroller] Could not refresh tab icons", error);
+  }
+}
+
+chrome.tabs.onActivated.addListener(async ({tabId})=>{
+  try{
+    const {settings: stored} = await chrome.storage.sync.get(["settings"]);
+    const tab = await chrome.tabs.get(tabId);
+    await refreshTabIcon(tab.id, tab.url, {...getDefaultSettings(), ...(stored || {})});
+  }catch{}
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab)=>{
+  if(changeInfo.status !== "complete") return;
+  chrome.storage.sync.get(["settings"]).then(({settings: stored})=>
+    refreshTabIcon(tabId, tab.url, {...getDefaultSettings(), ...(stored || {})})
+  ).catch(()=>{});
+});
+
 chrome.runtime.onMessage.addListener((msg,sender,sendResponse)=>{
   (async()=>{
-    if(msg.type==="SAVE_TO_BOOKMARK"){
+    if(msg.type==="UPDATE_SCROLL_PERCENT"){
+      const tabId = sender.tab?.id;
+      const percent = Number(msg.percent);
+      if(Number.isInteger(tabId) && Number.isFinite(percent)){
+        await setScrollPercentIcon(tabId, Math.max(0, Math.min(500, percent)));
+      }
+      sendResponse({ok:true});
+    } else if(msg.type==="SAVE_TO_BOOKMARK"){
       try{
         const bm = await saveToBookmark(msg.settings, msg.folderId);
         sendResponse({ok:true, bookmark:bm});

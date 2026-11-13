@@ -62,6 +62,11 @@
     if(best) return Number(best.scrollPercent);
     return Number(settings.globalScrollPercent);
   }
+  function reportScrollPercent(){
+    try{
+      return chrome.runtime.sendMessage({type:"UPDATE_SCROLL_PERCENT", percent:getScrollPercent()}).catch(()=>null);
+    }catch{ return Promise.resolve(null); }
+  }
   function isEditable(el){
     if(!el) return false;
     try{
@@ -277,6 +282,11 @@
     const initialPercent = best ? best.scrollPercent : getScrollPercent();
     const initialEnabled = best ? (best.enabled!==false) : true;
     const globalPercent = settings.globalScrollPercent;
+    const appliedPercent = getScrollPercent();
+    const percentDetails = [
+      appliedPercent !== 100 ? `<b>${appliedPercent}%</b>` : "",
+      globalPercent !== 100 ? `(${msg("dialogGlobal")} ${globalPercent}%)` : ""
+    ].filter(Boolean).join(" ");
 
     const hostElement=document.createElement("div");
     hostElement.id="__web_page_scroller_dialog_host__";
@@ -295,7 +305,7 @@
         <h2 id="wps-title">${msg("dialogTitle")}</h2>
         <div class="wps-current">
           ${msg("dialogCurrentSite")}: <b>${escapeHtml(host)}</b><br>
-          ${msg("dialogApplied")}: <b>${getScrollPercent()}%</b> (${msg("dialogGlobal")} ${globalPercent}%)<br>
+          ${percentDetails ? `${msg("dialogApplied")}: ${percentDetails}<br>` : ""}
           ${msg("dialogUrl")}: <span style="word-break:break-all; color:#6b7280;">${escapeHtml(url.slice(0,120))}</span>
         </div>
         <div class="wps-row">
@@ -377,6 +387,8 @@
           let s=res.settings || clone(DEFAULT_SETTINGS);
           s.siteRules=(s.siteRules||[]).filter(r=>r.pattern!==pattern);
           await chrome.storage.sync.set({settings:s});
+          settings.siteRules=s.siteRules;
+          await reportScrollPercent();
           if(s.bookmark?.folderId){
             try{ chrome.runtime.sendMessage({type:"SAVE_TO_BOOKMARK", settings:s, folderId:s.bookmark.folderId}); }catch{}
           }
@@ -411,6 +423,8 @@
           s.siteRules.push({pattern, scrollPercent:percent, enabled});
         }
         await chrome.storage.sync.set({settings:s});
+        settings.siteRules=s.siteRules;
+        await reportScrollPercent();
         if(s.bookmark?.folderId){
           try{ chrome.runtime.sendMessage({type:"SAVE_TO_BOOKMARK", settings:s, folderId:s.bookmark.folderId}); }catch{}
         }
@@ -431,6 +445,7 @@
   window.__WEB_PAGE_SCROLLER_STATE__ = { autoScrolling:false };
 
   loadSettings().then(()=>{
+    reportScrollPercent();
     window.addEventListener("keydown", onKeyDown, true);
     window.addEventListener("keyup", onKeyUp, true);
   });
@@ -440,6 +455,7 @@
       const nv=changes.settings.newValue;
       if(nv){
         settings={...clone(DEFAULT_SETTINGS),...nv, autoScroll:{...clone(DEFAULT_SETTINGS).autoScroll,...(nv.autoScroll||{})}, bookmark:{...clone(DEFAULT_SETTINGS).bookmark,...(nv.bookmark||{})}, siteRules:Array.isArray(nv.siteRules)?nv.siteRules:[]};
+        reportScrollPercent();
       }
     }
   });
