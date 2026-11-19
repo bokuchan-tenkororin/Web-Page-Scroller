@@ -369,7 +369,7 @@
 
     dialogRoot.querySelector("#wps-cancel").addEventListener("click", closeRegisterDialog);
     dialogRoot.querySelector("#wps-options").addEventListener("click", ()=>{
-      try{ chrome.runtime.sendMessage({type:"OPEN_OPTIONS"}); }catch{}
+      try{ chrome.runtime.sendMessage({type:"OPEN_OPTIONS"}).catch(()=>{}); }catch{}
       // フォールバック: 直接URLを開く
       try{
         const url=chrome.runtime.getURL("Options.html");
@@ -390,7 +390,7 @@
           settings.siteRules=s.siteRules;
           await reportScrollPercent();
           if(s.bookmark?.folderId){
-            try{ chrome.runtime.sendMessage({type:"SAVE_TO_BOOKMARK", settings:s, folderId:s.bookmark.folderId}); }catch{}
+            try{ chrome.runtime.sendMessage({type:"SAVE_TO_BOOKMARK", settings:s, folderId:s.bookmark.folderId}).catch(()=>{}); }catch{}
           }
           setStatus(msg("dialogDeleted"), true);
           setTimeout(closeRegisterDialog, 800);
@@ -426,7 +426,7 @@
         settings.siteRules=s.siteRules;
         await reportScrollPercent();
         if(s.bookmark?.folderId){
-          try{ chrome.runtime.sendMessage({type:"SAVE_TO_BOOKMARK", settings:s, folderId:s.bookmark.folderId}); }catch{}
+          try{ chrome.runtime.sendMessage({type:"SAVE_TO_BOOKMARK", settings:s, folderId:s.bookmark.folderId}).catch(()=>{}); }catch{}
         }
         setStatus(msg("dialogSaved", [pattern, String(percent)]), true);
         setTimeout(closeRegisterDialog, 900);
